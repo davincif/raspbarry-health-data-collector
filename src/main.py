@@ -3,9 +3,11 @@
 from time import perf_counter, sleep
 
 import globals
-from watchers.process_memory import ProcessMemory
+from watchers.cpu import CPU
 from watchers.temperature import Temperature
 from watchers.up_time import UpTime
+
+cost = 0
 
 
 def main():
@@ -17,7 +19,7 @@ def main():
 def watch():
     temp_sensor = Temperature()
     up_time = UpTime()
-    process_memory = ProcessMemory()
+    process_memory = CPU()
 
     while True:
         start = perf_counter()
@@ -30,12 +32,13 @@ def watch():
         print(up_time)
 
         process_memory.update()
-        print(process_memory)
+        # print(process_memory)
         # #######
 
-        enlapsed = perf_counter() - start
-        ramining = globals.update_rate - enlapsed
+        cost = perf_counter() - start
+        ramining = globals.update_rate - cost
 
+        print('measurement cost', cost)
         if ramining > 0:
             sleep(ramining)
 
