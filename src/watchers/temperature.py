@@ -10,10 +10,6 @@ import globals
 class Temperature:
     cpu = empty_temperature_info()
     gpu = empty_temperature_info()
-    # empty_info = empty_temperature_info()
-
-    # def __init__(self) -> None:
-    #     self.update()
 
     def update(self):
         if globals.vendor == Vendor.UNKNOWN:
@@ -55,6 +51,15 @@ class Temperature:
         at["current"] = info.current
         at["high"] = info.high
         at["critical"] = info.critical
+
+    def marshal_unmutables(self):
+        return {}
+
+    def marshal_update(self):
+        return {
+            "cpu": self.cpu,
+            "gpu": self.gpu,
+        }
 
     def __str__(self) -> str:
         return f"{self.cpu}\n{self.gpu}"

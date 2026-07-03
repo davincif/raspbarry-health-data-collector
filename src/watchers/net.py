@@ -26,5 +26,20 @@ class Net:
         self.dropin = net.dropin
         self.dropout = net.dropout
 
+    def marshal_unmutables(self):
+        return {}
+
+    def marshal_update(self):
+        return {
+            "bs": self.bytes_sent,
+            "br": self.bytes_recv,
+            "ps": self.packets_sent,
+            "pr": self.packets_recv,
+            "ei": self.errin,
+            "eo": self.errout,
+            "di": self.dropin,
+            "do": self.dropout,
+        }
+
     def __str__(self) -> str:
         return f"bytes_sent: {self.bytes_sent}, bytes_recv: {self.bytes_recv}, packets_sent: {self.packets_sent}, packets_recv: {self.packets_recv}, errin: {self.errin}, errout: {self.errout}, dropin: {self.dropin}, dropout: {self.dropout};"

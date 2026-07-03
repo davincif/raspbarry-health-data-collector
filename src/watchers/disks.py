@@ -46,5 +46,16 @@ class Disks:
         #     for disk in obsolete:
         #         del self.physicals[disk]
 
+    def marshal_unmutables(self):
+        return {
+            "t": self.total,
+            "u": self.used,
+            "f": self.free,
+            "p": self.percent,
+        }
+
+    def marshal_update(self):
+        return self.general.marshal_update()
+
     def __str__(self) -> str:
         return f"general {str(self.general)}"

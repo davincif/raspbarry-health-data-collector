@@ -19,5 +19,18 @@ class SwapMemory:
         self.sin = mem.sin
         self.sout = mem.sout
 
+    def marshal_unmutables(self):
+        return {}
+
+    def marshal_update(self):
+        return {
+            "t": self.total,
+            "u": self.used,
+            "f": self.free,
+            "p": self.percent,
+            "si": self.sin,
+            "so": self.sout,
+        }
+
     def __str__(self) -> str:
         return str(self.used)

@@ -40,6 +40,27 @@ class CPUCore:
         self.min_freq = freq.min
         self.max_freq = freq.max
 
+    def marshal_unmutables(self):
+        return {
+            "mnf": self.min_freq,
+            "mxf": self.max_freq,
+        }
+
+    def marshal_update(self):
+        return {
+            "user": self.user,
+            "sys": self.system,
+            "idle": self.idle,
+            "nice": self.nice,
+            "io": self.iowait,
+            "userp": self.user_percent,
+            "sysp": self.system_percent,
+            "idlep": self.idle_percent,
+            "nicep": self.nice_percent,
+            "iop": self.iowait_percent,
+            "cfreq": self.current_freq,
+        }
+
     def __str__(self) -> str:
         return (
             f"max_freq: {self.max_freq}; min_freq: {self.min_freq};\n"

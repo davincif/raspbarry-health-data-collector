@@ -14,10 +14,13 @@ class VirtualMemory:
     shared = 0.0
     slab = 0.0
 
+    def __init__(self) -> None:
+        mem = psutil.virtual_memory()
+        self.total = mem.total
+
     def update(self):
         mem = psutil.virtual_memory()
 
-        self.total = mem.total
         self.available = mem.available
         self.percent = mem.percent
         self.used = mem.used
@@ -28,6 +31,25 @@ class VirtualMemory:
         self.cached = mem.cached
         self.shared = mem.shared
         self.slab = mem.slab
+
+    def marshal_unmutables(self):
+        return {
+            "t": self.total,
+        }
+
+    def marshal_update(self):
+        return {
+            "a": self.available,
+            "p": self.percent,
+            "u": self.used,
+            "f": self.free,
+            "ac": self.active,
+            "in": self.inactive,
+            "b": self.buffers,
+            "ca": self.cached,
+            "sh": self.shared,
+            "sl": self.slab,
+        }
 
     def __str__(self) -> str:
         return str(self.percent)

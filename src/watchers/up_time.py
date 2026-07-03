@@ -19,6 +19,12 @@ class UpTime:
     def update(self):
         self.uptime = time() - self.boot_time
 
+    def marshal_unmutables(self):
+        return {"bt": self.boot_time}
+
+    def marshal_update(self):
+        return {"ut": self.uptime}
+
     def __str__(self) -> str:
         """Formatted String: "12h 34m 56s"""
         total_seconds = int(self.uptime)

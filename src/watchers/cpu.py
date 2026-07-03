@@ -1,3 +1,5 @@
+from typing import Any
+
 import psutil
 
 from watchers.helpers.cpu_core import CPUCore
@@ -7,7 +9,7 @@ class CPU:
     cores: int
     logical_cores: int
 
-    usage: float | None
+    usage_percet: float | None
     one_min_avg: float | None
     five_min_avg: float | None
     fifteen_min_avg: float | None
@@ -38,7 +40,7 @@ class CPU:
             core = self.virtual_cores[core_idx]
             core.update_time(times[core_idx], times_percent[core_idx], freqs[core_idx])
 
-        self.usage = psutil.cpu_percent()
+        self.usage_percet = psutil.cpu_percent()
 
         [
             self.one_min_avg,
@@ -50,6 +52,32 @@ class CPU:
         #     self.five_min_avg,
         #     self.fifteen_min_avg,
         # ] = [x / float(self.logical_cores) * 100 for x in psutil.getloadavg()]
+
+    def marshal_unmutables(self):
+        data: Any = {
+            "cr": self.cores,
+            "lcr": self.logical_cores,
+            **self.core.marshal_unmutables(),
+        }
+
+        if self.logical_cores > 0:
+            data["lcrinfo"] = [core.marshal_unmutables() for core in self.virtual_cores]
+
+        return data
+
+    def marshal_update(self):
+        data = {
+            "load": self.usage_percet,
+            "1min": self.one_min_avg,
+            "5min": self.five_min_avg,
+            "15min": self.fifteen_min_avg,
+            **self.core.marshal_update(),
+        }
+
+        if self.logical_cores > 0:
+            data["lcrinfo"] = [core.marshal_update() for core in self.virtual_cores]
+
+        return data
 
     def __build_cores(self):
         freqs = psutil.cpu_freq(percpu=True)

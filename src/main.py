@@ -5,6 +5,7 @@ Date: July of 2026
 Description: A wacther for the raspberry pi linux environment
 """
 
+import json
 import signal
 from time import perf_counter, sleep, time
 from types import FrameType
@@ -48,19 +49,21 @@ def watch():
     global kill_now
 
     print(
-        f"raspbarry-health-data-collector version: {globals.version}\nby - davincif\ncheck me @ ldavincif.com"
+        f"raspbarry-health-data-collector version: {globals.version}\nby - davincif\ncheck me @ ldavincif.com\n"
     )
 
     initial_time = time()
     init()
+    initial_data_to_transfer = serialize_unmutables()
 
     if globals.verbose:
         print("started at", initial_time)
 
-    while kill_now:
+    while not kill_now:
         start = perf_counter()
 
         update()
+        data_to_transfer = serialize_update()
 
         cost = perf_counter() - start
         ramining = globals.update_rate - cost
@@ -68,7 +71,9 @@ def watch():
         if ramining > 0:
             if globals.verbose:
                 print("measurement cost", cost, "\n")
-            sleep(ramining)
+
+            if not kill_now:
+                sleep(ramining)
 
 
 def init():
@@ -99,6 +104,36 @@ def update():
         print(memory)
         print(disk)
         print(net)
+
+
+def serialize_unmutables():
+    global temp_sensor, up_time, cpu, memory, disk, net
+
+    data = {
+        "temp": temp_sensor.marshal_unmutables(),
+        "uptime": up_time.marshal_unmutables(),
+        "process": cpu.marshal_unmutables(),
+        "memory": memory.marshal_unmutables(),
+        "disk": disk.marshal_unmutables(),
+        "net": net.marshal_unmutables(),
+    }
+
+    return json.dumps(data)
+
+
+def serialize_update():
+    global temp_sensor, up_time, cpu, memory, disk, net
+
+    data = {
+        "temp": temp_sensor.marshal_update(),
+        "uptime": up_time.marshal_update(),
+        "process": cpu.marshal_update(),
+        "memory": memory.marshal_update(),
+        "disk": disk.marshal_update(),
+        "net": net.marshal_update(),
+    }
+
+    return json.dumps(data)
 
 
 def exit_gracefully(signum: int, frame: FrameType | None):
