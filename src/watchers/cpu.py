@@ -44,7 +44,12 @@ class CPU:
             self.one_min_avg,
             self.five_min_avg,
             self.fifteen_min_avg,
-        ] = [x / float(self.logical_cores) * 100 for x in psutil.getloadavg()]
+        ] = psutil.getloadavg()
+        # [
+        #     self.one_min_avg,
+        #     self.five_min_avg,
+        #     self.fifteen_min_avg,
+        # ] = [x / float(self.logical_cores) * 100 for x in psutil.getloadavg()]
 
     def __build_cores(self):
         freqs = psutil.cpu_freq(percpu=True)
@@ -54,4 +59,3 @@ class CPU:
         return f"cpu: {str(self.core)}"
         # return (f"cpu: {str(self.core)}\n"
         #         + str([f"core-{idx+1}: {str(self.virtual_cores[idx])}" for idx in range(len(self.virtual_cores))]))
-
