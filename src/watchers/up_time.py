@@ -1,6 +1,8 @@
 import psutil
 from time import time
 
+import globals
+
 
 class UpTime:
     boot_time: float = 0
@@ -10,7 +12,9 @@ class UpTime:
 
     def __init__(self) -> None:
         self.boot_time = psutil.boot_time()
-        print("boot_time", self.boot_time)
+
+        if globals.verbose:
+            print("boot_time", self.boot_time)
 
     def update(self):
         self.uptime = time() - self.boot_time

@@ -3,6 +3,8 @@ from models.vendor import Vendor
 
 vendor = Vendor.UNKNOWN
 update_rate = 0.9
+version = "0.0.1"
+verbose = False
 
 
 def set_globals():
