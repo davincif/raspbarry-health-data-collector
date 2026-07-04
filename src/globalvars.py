@@ -1,10 +1,14 @@
 import psutil
 from models.vendor import Vendor
 
+kill_now = False
 vendor = Vendor.UNKNOWN
 update_rate = 0.9
 version = "0.0.1"
 verbose = False
+server_now = {"now": 0, "counter": 0}
+
+AUTO_CONNECT_PORT = 6271
 
 
 def set_globals():

@@ -9,17 +9,20 @@ import json
 import signal
 from time import perf_counter, sleep, time
 from types import FrameType
-import psutil
 
-import globals
+import psutil
+import asyncio
+
+from connection import find_data_orchestrator_server
+import globalvars
 from watchers.cpu import CPU
 from watchers.disks import Disks
 from watchers.memory import Memory
 from watchers.net import Net
 from watchers.temperature import Temperature
 from watchers.up_time import UpTime
+from websock import Websock
 
-kill_now = False
 cost = 0
 
 temp_sensor: Temperature
@@ -28,16 +31,28 @@ cpu: CPU
 memory: Memory
 disk: Disks
 net: Net
+websock: Websock
+isInited = False
 
 
-def main():
+async def main():
     signal.signal(signal.SIGTERM, exit_gracefully)
     signal.signal(signal.SIGINT, exit_gracefully)
 
-    validate_os()
+    print(
+        f"raspbarry-health-watcher version: {globalvars.version}\nby - davincif\ncheck me @ ldavincif.com\n"
+    )
 
-    globals.set_globals()
-    watch()
+    validate_os()
+    globalvars.set_globals()
+
+    server = find_data_orchestrator_server()
+    if server is None:
+        raise Exception("health orchestrator server not found")
+
+    print("server found at", server)
+
+    watch(server)
 
 
 def validate_os():
@@ -45,39 +60,37 @@ def validate_os():
         raise OSError("System not suported")
 
 
-def watch():
-    global kill_now
-
-    print(
-        f"raspbarry-health-data-collector version: {globals.version}\nby - davincif\ncheck me @ ldavincif.com\n"
-    )
+def watch(server: tuple[str, int]):
+    global websock
 
     initial_time = time()
-    init()
+    init(server)
     initial_data_to_transfer = serialize_unmutables()
+    # websock.send(initial_data_to_transfer.encode())
 
-    if globals.verbose:
+    if globalvars.verbose:
         print("started at", initial_time)
 
-    while not kill_now:
+    while not globalvars.kill_now:
         start = perf_counter()
 
         update()
         data_to_transfer = serialize_update()
+        # websock.send(data_to_transfer.encode())
 
         cost = perf_counter() - start
-        ramining = globals.update_rate - cost
+        ramining = globalvars.update_rate - cost
 
         if ramining > 0:
-            if globals.verbose:
+            if globalvars.verbose:
                 print("measurement cost", cost, "\n")
 
-            if not kill_now:
+            if not globalvars.kill_now:
                 sleep(ramining)
 
 
-def init():
-    global temp_sensor, up_time, cpu, memory, disk, net
+def init(server: tuple[str, int]):
+    global temp_sensor, up_time, cpu, memory, disk, net, websock, isInited
 
     temp_sensor = Temperature()
     up_time = UpTime()
@@ -85,6 +98,9 @@ def init():
     memory = Memory()
     disk = Disks()
     net = Net()
+    websock = Websock(server)
+
+    isInited = True
 
 
 def update():
@@ -97,7 +113,7 @@ def update():
     disk.update()
     net.update()
 
-    if globals.verbose:
+    if globalvars.verbose:
         print(temp_sensor)
         print(up_time)
         print(cpu)
@@ -116,6 +132,8 @@ def serialize_unmutables():
         "memory": memory.marshal_unmutables(),
         "disk": disk.marshal_unmutables(),
         "net": net.marshal_unmutables(),
+        "now": (perf_counter() - globalvars.server_now["counter"])
+        + globalvars.server_now["now"],
     }
 
     return json.dumps(data)
@@ -131,17 +149,21 @@ def serialize_update():
         "memory": memory.marshal_update(),
         "disk": disk.marshal_update(),
         "net": net.marshal_update(),
+        "now": (perf_counter() - globalvars.server_now["counter"])
+        + globalvars.server_now["now"],
     }
 
     return json.dumps(data)
 
 
 def exit_gracefully(signum: int, frame: FrameType | None):
-    global kill_now
+    global websock
 
     print(f"singal {signal.Signals(signum).name} received, closing...")
-    kill_now = True
+    globalvars.kill_now = True
+    if isInited:
+        websock.close()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

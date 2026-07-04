@@ -4,7 +4,7 @@ import psutil
 
 from models.temperature_info import TemperatureInfo, empty_temperature_info
 from models.vendor import Vendor
-import globals
+import globalvars
 
 
 class Temperature:
@@ -12,12 +12,12 @@ class Temperature:
     gpu = empty_temperature_info()
 
     def update(self):
-        if globals.vendor == Vendor.UNKNOWN:
+        if globalvars.vendor == Vendor.UNKNOWN:
             return
 
-        if globals.vendor == Vendor.RASBPARRY_PI:
+        if globalvars.vendor == Vendor.RASBPARRY_PI:
             self.update_raspberrypi()
-        elif globals.vendor == Vendor.THINKPAD:
+        elif globalvars.vendor == Vendor.THINKPAD:
             self.update_thinkpad()
 
     def update_raspberrypi(self):

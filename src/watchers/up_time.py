@@ -1,7 +1,7 @@
 import psutil
 from time import time
 
-import globals
+import globalvars
 
 
 class UpTime:
@@ -13,7 +13,7 @@ class UpTime:
     def __init__(self) -> None:
         self.boot_time = psutil.boot_time()
 
-        if globals.verbose:
+        if globalvars.verbose:
             print("boot_time", self.boot_time)
 
     def update(self):
