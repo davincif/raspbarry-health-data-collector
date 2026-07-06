@@ -9,10 +9,13 @@ class SwapMemory:
     sin = 0.0
     sout = 0.0
 
+    def __init__(self) -> None:
+        mem = psutil.swap_memory()
+        self.total = mem.total
+
     def update(self):
         mem = psutil.swap_memory()
 
-        self.total = mem.total
         self.used = mem.used
         self.free = mem.free
         self.percent = mem.percent
@@ -20,11 +23,12 @@ class SwapMemory:
         self.sout = mem.sout
 
     def marshal_unmutables(self):
-        return {}
+        return {
+            "t": self.total,
+        }
 
     def marshal_update(self):
         return {
-            "t": self.total,
             "u": self.used,
             "f": self.free,
             "p": self.percent,

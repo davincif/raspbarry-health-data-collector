@@ -1,5 +1,4 @@
 import psutil
-from time import time
 
 import globalvars
 
@@ -17,13 +16,15 @@ class UpTime:
             print("boot_time", self.boot_time)
 
     def update(self):
-        self.uptime = time() - self.boot_time
+        # self.uptime = time() - self.boot_time
+        pass
 
     def marshal_unmutables(self):
         return {"bt": self.boot_time}
 
     def marshal_update(self):
-        return {"ut": self.uptime}
+        # return {"ut": self.uptime}
+        return {}
 
     def __str__(self) -> str:
         """Formatted String: "12h 34m 56s"""

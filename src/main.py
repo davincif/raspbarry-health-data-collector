@@ -111,7 +111,7 @@ def update():
     global temp_sensor, up_time, cpu, memory, disk, net
 
     temp_sensor.update()
-    up_time.update()
+    # up_time.update()
     cpu.update()
     memory.update()
     disk.update()
@@ -146,7 +146,7 @@ def serialize_update(cost: float):
 
     data = {
         "temp": temp_sensor.marshal_update(),
-        "uptime": up_time.marshal_update(),
+        # "uptime": up_time.marshal_update(),
         "process": cpu.marshal_update(),
         "memory": memory.marshal_update(),
         "disk": disk.marshal_update(),
