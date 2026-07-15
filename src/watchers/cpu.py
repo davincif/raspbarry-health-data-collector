@@ -83,8 +83,6 @@ class CPU:
 
     def __build_cores(self):
         freqs = psutil.cpu_freq(percpu=True)
-        print("freqs", freqs)
-        print("self.logical_cores", self.logical_cores)
         self.physical_cores = [CPUCore(freq) for freq in freqs]
 
     def __str__(self) -> str:

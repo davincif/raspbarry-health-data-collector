@@ -46,14 +46,6 @@ def main():
 
     server = (globalvars.server_address, globalvars.server_port)
 
-    if globalvars.kill_now:
-        return
-
-    if server is None:
-        raise Exception("health orchestrator server not found")
-
-    print("server found at", server)
-
     watch(server)
 
 

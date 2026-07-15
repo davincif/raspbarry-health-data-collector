@@ -30,18 +30,30 @@ class Websock:
             try:
                 self.__consume_queue()
                 print("health streaming to server stoped.")
-                retries = globalvars.timeout_retries_attempt
             except TimeoutError as error:
                 retries += 1
-                print("server not responding: timeout", error)
+                print("server not responding: timeout")
+                print(error)
                 print("trying again...")
-
+            except ConnectionError as error:
+                retries += 1
+                print("server not responding: connection error")
+                print(error)
+                print("trying again...")
+                sleep(2)
+            except Exception as error:
+                print(
+                    "somewthing that the software don't know how to deal with went wrong:",
+                    error,
+                )
+                globalvars.kill_now = True
+            finally:
                 if retries == globalvars.timeout_retries_attempt:
                     print("maximum retries reached, giving up connection.")
                     globalvars.kill_now = True
 
     def close(self):
-        self.queue = []
+        self.queue.clear()
         try:
             self.queue_lock.release()
         except Exception:
@@ -49,6 +61,7 @@ class Websock:
 
     def __consume_queue(self):
         with connect(self.uri) as websocket:
+            print("connected!")
             while not globalvars.kill_now:
                 if self.queue_lock.locked() or len(self.queue) == 0:
                     sleep(globalvars.update_rate)
